@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rypotic - official hub</title>
+    
+    <link rel="icon" id="favicon" href="New Project (2).png" type="image/png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #050811;          /* Sleek Obsidian Black */
+            --panel-bg: #0c1322;         /* Deep cosmic blue card background */
+            --accent-blue: #3b82f6;      /* Solid Electric Blue (No glow) */
+            --text-primary: #f8fafc;     /* Clean off-white */
+            --text-secondary: #94a3b8;   /* Soft slate gray */
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ==========================================================================
+           3D ZOOM-IN STARTUP INTRO (GLOW-FREE & DYNAMIC)
+           ========================================================================== */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px; /* High depth perspective for cinematic zoom */
+            transition: opacity 0.9s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 3D Scene Container */
+        .intro-3d-scene {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: sceneEntrance 2.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Lowercase Name Asset zooming in 3D */
+        .intro-title-asset {
+            font-family: 'Space Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: lowercase;
+            letter-spacing: -2px;
+            transform-style: preserve-3d;
+            position: absolute;
+            animation: textZoom 2.8s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+        }
+
+        /* Solid tech geometric structural lines (No glows) */
+        .intro-frame-asset {
+            position: absolute;
+            width: 260px;
+            height: 80px;
+            border: 2px solid var(--accent-blue);
+            transform-style: preserve-3d;
+            animation: frameZoom 2.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        }
+
+        .intro-ring-asset {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border: 1px dashed var(--text-secondary);
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            animation: ringZoom 2.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        }
+
+        /* Animations for 3D Camera Fly-through */
+        @keyframes sceneEntrance {
+            0% {
+                transform: rotateX(20deg) rotateY(-10deg) rotateZ(-5deg);
+            }
+            100% {
+                transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+            }
+        }
+
+        @keyframes textZoom {
+            0% {
+                transform: translateZ(-1500px) scale(0.1);
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+            85% {
+                transform: translateZ(50px) scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateZ(500px) scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes frameZoom {
+            0% {
+                transform: translateZ(-2000px) rotateZ(-90deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.6;
+            }
+            80% {
+                transform: translateZ(100px) rotateZ(10deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateZ(600px) rotateZ(20deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes ringZoom {
+            0% {
+                transform: translateZ(-1000px) rotateX(45deg);
+                opacity: 0;
+            }
+            40% {
+                opacity: 0.5;
+            }
+            90% {
+                transform: translateZ(200px) rotateX(0deg);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateZ(700px);
+                opacity: 0;
+            }
+        }
+
+        /* App Reveal Stage - Fly past the camera */
+        .loaded #loader-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.5);
+        }
+
+
+        /* ==========================================================================
+           MAIN PAGE LAYOUT & CASCADING REVEALS
+           ========================================================================== */
+        #app-content {
+            z-index: 10;
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Seamless Staggered Entry Configurations */
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .reveal-item.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            justify-content: flex-end;
+            padding: 30px 5%;
+        }
+
+        /* Minimalist Dropdown */
+        select {
+            background-color: var(--panel-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+
+        select:hover, select:focus {
+            border-color: var(--accent-blue);
+        }
+
+        /* Central Layout Content */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            max-width: 900px;
+            padding: 0 24px 60px 24px;
+            text-align: center;
+        }
+
+        /* Flat Profile Frame */
+        .pfp-frame {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            padding: 4px;
+            background: var(--accent-blue);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Separate transition configuration to prevent hover clashing during page reveal */
+        .pfp-frame.reveal-item {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .pfp-frame.reveal-item.revealed {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.3s ease;
+        }
+
+        .pfp-frame.reveal-item.revealed:hover {
+            transform: scale(1.03);
+        }
+
+        .pfp-frame img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--bg-dark);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Headings */
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            text-transform: lowercase;
+        }
+
+        .description {
+            font-size: 1.15rem;
+            max-width: 600px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 45px;
+            font-weight: 400;
+        }
+
+        /* Clean Card Grid System (No shadows/glows) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 750px;
+            margin-bottom: 45px;
+        }
+
+        .stat-card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px 15px;
+            position: relative;
+        }
+
+        .stat-card.reveal-item {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        border-color 0.25s ease;
+        }
+
+        .stat-card.reveal-item.revealed {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.25s ease,
+                        border-color 0.25s ease;
+        }
+
+        .stat-card.reveal-item.revealed:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-blue);
+        }
+
+        .stat-card.live::after {
+            content: "LIVE";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ef4444;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .stat-val {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            opacity: 1;
+            transition: opacity 0.3s ease; /* For smooth, fade-in data swapping */
+        }
+
+        /* Action Button */
+        .btn-subscribe {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: var(--accent-blue);
+            border-radius: 12px;
+            padding: 16px 45px;
+            text-decoration: none;
+        }
+
+        .btn-subscribe.reveal-item {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                        background-color 0.2s ease;
+        }
+
+        .btn-subscribe.reveal-item.revealed {
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+                        transform 0.2s ease,
+                        background-color 0.2s ease;
+        }
+
+        .btn-subscribe.reveal-item.revealed:hover {
+            transform: translateY(-1px);
+            background-color: #2563eb;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .btn-subscribe { font-size: 0.9rem; padding: 14px 30px; }
+            .pfp-frame { width: 120px; height: 120px; }
+            nav { padding: 20px; justify-content: center; }
+            select { width: 100%; max-width: 320px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader-overlay">
+        <div class="intro-3d-scene">
+            <div class="intro-ring-asset"></div>
+            <div class="intro-frame-asset"></div>
+            <div class="intro-title-asset">rypotic</div>
+        </div>
+    </div>
+
+    <div id="app-content">
+        <nav class="reveal-item">
+            <select id="languageSelector" onchange="userSelectedLanguage()">
+                <option value="en">ENGLISH</option>
+                <option value="es">ESPAÑOL</option>
+                <option value="zh">中文 (CHINESE)</option>
+                <option value="hi">हिन्दी (HINDI)</option>
+                <option value="ar">العربية (ARABIC)</option>
+                <option value="fr">FRANÇAIS</option>
+                <option value="bn">বাংলা (BENGALI)</option>
+                <option value="pt">PORTUGUÊS</option>
+                <option value="ru">РУССКИЙ</option>
+                <option value="ur">اردو (URDU)</option>
+                <option value="id">BAHASA INDONESIA</option>
+                <option value="de">DEUTSCH</option>
+                <option value="ja">日本語 (JAPANESE)</option>
+                <option value="mr">मराठी (MARATHI)</option>
+                <option value="te">తెలుగు (TELUGU)</option>
+                <option value="tr">TÜRKÇE</option>
+                <option value="ta">தமிழ் (TAMIL)</option>
+                <option value="ko">한국어 (KOREAN)</option>
+                <option value="vi">TIẾNG VIỆT</option>
+                <option value="it">ITALIANO</option>
+                <option value="fa">فارسی (PERSIAN)</option>
+                <option value="pl">POLSKI</option>
+                <option value="uk">YКРАЇНСЬКА (UKRAINIAN)</option>
+                <option value="nl">NEDERLANDS</option>
+                <option value="th">ภาษาไทย (THAI)</option>
+                <option value="gu">ગુજરાતી (GUJARATI)</option>
+                <option value="kn">ಕನ್ನಡ (KANNADA)</option>
+                <option value="ml">മലയാളം (MALAYALAM)</option>
+                <option value="ro">ROMÂNĂ</option>
+                <option value="az">AZƏRBAYCAN</option>
+                <option value="uz">OʻZBEKCHA</option>
+                <option value="ms">BAHASA MELAYU</option>
+                <option value="am">አማርኛ (AMHARIC)</option>
+                <option value="yo">YORÙBÁ</option>
+                <option value="so">SOMALI</option>
+                <option value="bg">БЪЛГАРСКИ</option>
+                <option value="sv">SVENSKA</option>
+                <option value="cs">ČEŠTINA</option>
+                <option value="hu">MAGYAR</option>
+                <option value="el">ΕΛΛΗΝΙΚΑ (GREEK)</option>
+                <option value="sk">SLOVENČINA</option>
+                <option value="hr">HRVATSKI</option>
+                <option value="da">DANSK</option>
+                <option value="fi">SUOMI</option>
+                <option value="no">NORSK</option>
+                <option value="he">עברית (HEBREW)</option>
+                <option value="kk">ҚАЗАҚША (KAZAKH)</option>
+                <option value="lt">LIETUVIŲ</option>
+                <option value="lv">LATVIEŠU</option>
+                <option value="et">EESTI</option>
+                <option value="sl">SLOVENŠČINA</option>
+                <option value="sr">СРПСКИ (SERBIAN)</option>
+                <option value="hy">ՀԱՅԵՐԵΝ (ARMENIAN)</option>
+            </select>
+        </nav>
+
+        <main class="container">
+            <div class="pfp-frame reveal-item">
+                <img id="pfpImage" src="New Project (2).png" alt="rypotic pfp">
+            </div>
+            
+            <h1 id="title" class="reveal-item">rypotic</h1>
+            <p id="description" class="description reveal-item">Detecting local access node...</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card live reveal-item">
+                    <div class="stat-title" id="lblSubs">SUBSCRIBERS</div>
+                    <div id="statSubs" class="stat-val">---</div>
+                </div>
+                <div class="stat-card reveal-item">
+                    <div class="stat-title" id="lblViews">TOTAL VIEWS</div>
+                    <div id="statViews" class="stat-val">---</div>
+                </div>
+                <div class="stat-card reveal-item">
+                    <div class="stat-title" id="lblVideos">VIDEOS</div>
+                    <div id="statVideos" class="stat-val">---</div>
+                </div>
+            </div>
+            
+            <a href="https://youtube.com/@rypotic" target="_blank" id="subscribeBtn" class="btn-subscribe reveal-item">JOIN CHANNEL</a>
+        </main>
+    </div>
+
+    <script>
+        // ================= CONFIGURATION =================
+        const API_KEY = "AIzaSyA6-iaqBaV_ojNUtBYNgiQYvKDnd9_Cg3M"; 
+        const CHANNEL_ID = "UCDI6_C1JHhu52F0MpVWdA9g"; 
+        // =================================================
+
+        // Fully supported 53 mainstream languages mapping
+        const translations = {
+            en: { d: "Dive into the digital grid. Catch the latest high-octane gaming content and join the pixel crew!", s: "SUBSCRIBERS", v: "TOTAL VIEWS", vi: "VIDEOS", b: "JOIN CHANNEL" },
+            es: { d: "¡Sumérgete en la red digital, disfruta del mejor contenido gaming y únete a la comunidad pixelada!", s: "SUSCRIPTORES", v: "VISTAS TOTALES", vi: "VIDEOS", b: "UNIRSE AL CANAL" },
+            zh: { d: "融入数字世界。观看最新、最火爆的游戏内容，加入我们的像素阵营！", s: "订阅者", v: "总观看次数", vi: "视频数", b: "加入频道" },
+            hi: { d: "डिजिटल ग्रिड में कदम रखें। बेहतरीन गेमिंग कंटेंट देखें और पिक्सेल क्रू में शामिल हों!", s: "सदस्य", v: "कुल व्यूज", vi: "वीडियो", b: "चैनल से जुड़ें" },
+            ar: { d: "انغمس في الشبكة الرقمية. تابع أحدث محتوى الألعاب المثير وانضم إلى طاقم البكسل الخاص بنا!", s: "المشتركون", v: "إجمالي المشاهدات", vi: "الفيديوهات", b: "اشترك الآن" },
+            fr: { d: "Plongez dans la grille numérique. Profitez des derniers contenus gaming et rejoignez l'équipe pixel !", s: "ABONNÉS", v: "VUES TOTALES", vi: "VIDÉOS", b: "REJOINDRE" },
+            bn: { d: "ডিজিটাল গ্রিডে প্রবেশ করুন। সেরা গেমিং কন্টেন্ট উপভোগ করুন এবং আমাদের পিক্সেল দলে যোগ দিন!", s: "সাবস্ক্রাইবার", v: "মোট ভিউ", vi: "ভিডিও", b: "যুক্ত হোন" },
+            pt: { d: "Mergulhe no grid digital. Assista ao melhor conteúdo gamer e junte-se à nossa guilda pixelada!", s: "INSCRITOS", v: "VISUALIZAÇÕES", vi: "VÍDEOS", b: "INSCREVER-SE" },
+            ru: { d: "Погрузись в цифровую сеть. Смотри крутейший игровой контент и вступай в нашу пиксельную банду!", s: "ПОДПИСЧИКИ", v: "ПРОСМОТРЫ", vi: "ВИДЕО", b: "ПОДПИСАТЬСЯ" },
+            ur: { d: "ڈیجیٹل گریڈ میں شامل ہوں۔ تازہ ترین زبردست گیمنگ مواد دیکھیں اور پکسل ٹیم का حصہ بنیں!", s: "سبسکرائبرز", v: "کل ویوز", vi: "ویڈیوز", b: "شامل ہوں" },
+            id: { d: "Masuk ke dunia digital grid. Tonton konten gaming seru terbaru dan bergabunglah dengan kru piksel!", s: "SUBSCRIBER", v: "TOTAL TAYANGAN", vi: "VIDEO", b: "GABUNG SALURAN" },
+            de: { d: "Tauche ein in das digitale Raster. Hol dir die neuesten Gaming-Inhalte und werde Teil der Pixel-Crew!", s: "ABONNENTEN", v: "ANSICHTEN", vi: "VIDEOS", b: "KANAL BEITRETEN" },
+            ja: { d: "デジタルグリッドへ飛び込もう。最新のゲーム実況動画をチェックして、ピクセルクルーに参加しよう！", s: "チャンネル登録者", v: "総再生回数", vi: "動画数", b: "登録する" },
+            mr: { d: "डिजिटल ग्रिडमध्ये प्रवेश करा. सर्वोत्तम गेमिंग व्हिडिओ पहा आणि पिक्सेल क्रूमध्ये सामील व्हा!", s: "सदस्य", v: "एकूण व्ह्यूज", vi: "व्हिडिओ", b: "चॅनेल सबस्क्राईब करा" },
+            te: { d: "డిజిటల్ గ్రిడ్‌లోకి అడుగుపెట్టండి. సరికొತ್ತ గేమింగ్ కంటెంట్‌ను వీక్షించండి మరియు పిక్సెల్ క్రూలో చేరండి!", s: "సబ్‌స్క్రైబర్లు", v: "మొತ್ತం వీక్షణలు", vi: "వీдеоలు", b: "ఛానెల్‌లో చేరండి" },
+            tr: { d: "Dijital ağa adım at. En son yüksek tempolu oyun içeriklerini yakala ve ekibe katıl!", s: "ABONE SAYISI", v: "TOPLAM İZLENME", vi: "VİDEOLAR", b: "ABONE OL" },
+            ta: { d: "டிજิตல் கிரிட்டில் இணையுங்கள். சிறந்த கேமிங் வீடியோக்களைப் பார்த்து, எங்களுடன் இணைந்திடுங்கள்!", s: "சந்தாதாரர்கள்", v: "மொತ್ತ பார்வைகள்", vi: "வீдеоக்கள்", b: "இணைந்திடுங்கள்" },
+            ko: { d: "디지털 그리드로 접속하세요. 최신 고화질 게이밍 콘텐츠를 즐기고 픽셀 크루에 합류하세요!", s: "구독자 수", v: "총 조회수", vi: "동영상", b: "구독하기" },
+            vi: { d: "Đắm chìm vào không gian kỹ thuật số. Xem những nội dung game đỉnh cao và tham gia vào biệt đội pixel!", s: "NGƯỜI ĐĂNG KÝ", v: "LƯỢT XEM", vi: "VIDEO", b: "ĐĂNG KÝ" },
+            it: { d: "Entra nella griglia digitale. Scopri i migliori contenuti di gioco e unisciti alla pixel crew!", s: "ISCRITTI", v: "VISUALIZZAZIONI", vi: "VIDEO", b: "ISCRIVITI" },
+            fa: { d: "به دنیای دیجیتال بپیوندید. جدیدترین ویدیوهای گیمینگ را تماشا کنید و عضو تیم ما شوید!", s: "دنبال‌کننده‌ها", v: "بازدید کل", vi: "ویدیوها", b: "عضویت در کانال" },
+            pl: { d: "Wkrocz do cyfrowej sieci. Oglądaj najnowsze materiały gamingowe i dołącz do naszej ekipy!", s: "SUBSKRYBENCI", v: "WYŚWIETLENIA", vi: "FILMY", b: "DOŁĄCZ" },
+            uk: { d: "Поринь у цифровий світ. Дивись найкрутіший ігровий контент та приєднуйся до нашої команди!", s: "ПІДПИСНИКИ", v: "ПЕРЕГЛЯДИ", vi: "ВІДЕО", b: "ПРИЄДНАТИСЯ" },
+            nl: { d: "Duik in het digitale raster. Bekijk de vetste gaming content en join de pixel crew!", s: "ABONNEES", v: "TOTAAL WEERGAVEN", vi: "VIDEO'S", b: "ABONNEREN" },
+            th: { d: "เข้าสู่โลกดิจิทัลกริด รับชมคอนเทนต์เกมสุดมันส์ล่าสุด และเข้าร่วมเป็นทีมงานพิกเซลกับเรา!", s: "ผู้ติดตาม", v: "ยอดการดูทั้งหมด", vi: "วิดีโอ", b: "ติดตามช่อง" },
+            gu: { d: "ડિજિટલ ગ્રીડમાં જોડાઓ. લેટેસ્ટ ગેમિંગ વીડિયો જુઓ અને પિક્સેલ ટીમનો ભાગ બનો!", s: "સબ્સ્ક્રાઇબર્સ", v: "કુલ વ્યુઝ", vi: "વીડિયો", b: "ચેનલ સબ્સ્ક્રાઇબ કરો" },
+            kn: { d: "டிஜிটাল ಗ್ರಿಡ್‌ಗೆ ಹೆಜ್ಜೆ ಇಡಿ. ಲೇಟೆಸ್ಟ್ ಗೇಮಿಂಗ್ ಕಂಟೆಂಟ್ ನೋಡಿ ಮತ್ತು ಪಿಕ್ಸೆಲ್ ಕ್ರೂ ಸೇರಿಕೊಳ್ಳಿ!", s: "ಚಂದಾದಾರರು", v: "ಒಟ್ಟು ವೀಕ್ಷಣೆಗಳು", vi: "ವಿಡಿಯೋಗಳು", b: "ಚಾನೆಲ್ ಸೇರಿ" },
+            ml: { d: "ഡിജിറ്റൽ ഗ്രിഡിലേക്ക് കടന്നുവരൂ. ലേറ്റസ്റ്റ് ഗെയിമിംഗ് വീഡിയോകൾ കണ്ട് പിക്സൽ ക്രൂവിൽ അംഗമാகூ!", s: "സബ്സ്ക്രൈബർമാർ", v: "ആകെ കാഴ്ച്ചകൾ", vi: "വീдеоകൾ", b: "ചാനലിൽ ചേരുക" },
+            ro: { d: "Intră în lumea digitală. Urmărește cel mai nou conținut de gaming și alătură-te echipei de pixeli!", s: "ABONAȚI", v: "VIZUALIZĂRI", vi: "VIDEOCLIPURI", b: "ALĂTURĂ-TE KANAL" },
+            az: { d: "Rəqəmsal şəbəkəyə daxil olun. Ən son oyun videolarını izləyin və komandamıza qoşulun!", s: "ABUNƏÇİLƏR", v: "BAXIŞ SAYI", vi: "VİDEOLAR", b: "KANALA QOŞUL" },
+            uz: { d: "Raqamli tarmoqqa kiring. Eng so'nggi qiziqarli geyming videolarini tomosha qiling va jamoaga qo'shiling!", s: "OBUNACHILAR", v: "KO'RILISHLAR", vi: "VİDEOLAR", b: "QO'SHILISH" },
+            ms: { d: "Sertai grid digital. Tonton kandungan permainan video terkini dan sertai kru piksel kami!", s: "PELANGGAN", v: "JUMLAH TONTONAN", vi: "VIDEO", b: "LANGGAN" },
+            am: { d: "ወደ ዲጂታል ግሪድ ይግቡ። የቅርብ ጊዜ የጌሚንግ ቪዲዮዎችን ይመልకెቱ आणि የፒክሰል ቡድንን ይቀላቀሉ!", s: "ተከታዮች", v: "ጠቅላላ እይታዎች", vi: "ቪዲዮዎች", b: "ሰብስክራይብ ያድርጉ" },
+            yo: { d: "Darapọ mọ nẹtiwọọki oni-nọmba wa. Wo awọn fidio ere tuntun ki o darapọ mọ ẹgbẹ wa!", s: "AWỌN OLUTẸLẸ", v: "WOSAN GBOGBO", vi: "FIDIO", b: "DARAPỌ MỌ" },
+            so: { d: "Ku soo biir shabakada dhijitaalka ah. Daawo muuqaaladii ugu dambeeyay ee ciyaaraha!", s: "KUWA RAACAY", v: "DAAWASHO KULAN", vi: "MUUQAALO", b: "KU SOO BIIR" },
+            bg: { d: "Потопете се в дигиталната мрежа. Гледайте най-новото гейминг съдържание и се присъединете!", s: "АБОНАТИ", v: "ОБЩО ГЛЕДАНИЯ", vi: "ВИДЕОКЛИПОВЕ", b: "АБОНИРАЙ СЕ" },
+            sv: { d: "Dyk in i det digitala nätet. Se det senaste inom gaming och gå med i pixel-gänget!", s: "PRENUMERANTER", v: "VISNINGAR TOTALT", vi: "VIDEOR", b: "PRENUMERERA" },
+            cs: { d: "Vstupte do digitální sítě. Sledujte nejnovější herní obsah a přidejte se k naší pixelové partě!", s: "ODBĚRATELÉ", v: "ZHLÉDNUTÍ CELKEM", vi: "VIDEA", b: "ODEBÍRAT" },
+            hu: { d: "Lépj be a digitális hálózatba! Nézd a legfrissebb pörgős játékos videókat, és tarts a csapattal!", s: "FELIRATKOZÓK", v: "ÖSSZES MEGTEKINTÉS", vi: "VIDEÓK", b: "FELIRATKOZÁS" },
+            el: { d: "Μπείτε στο ψηφιακό δίκτυο. Δείτε το καλύτερο περιεχόμενο gaming και γίνετε μέλος της ομάδας μας!", s: "ΕΓΓΕΓΡΑΜΜΕΝΟΙ", v: "ΣΥΝΟΛΙΚΕΣ ΠΡΟΒΟΛΕΣ", vi: "ΒΙΝΤΕΟ", b: "ΕΓΓΡΑΦΗ" },
+            sk: { d: "Vstúpte do digitálnej siete. Sledujte najnovšie herné videá a pridajte sa k našej posádke!", s: "ODBERATELIA", v: "ZOBRAZENIA CELKOVO", vi: "VIDEÁ", b: "ODOBERAŤ" },
+            hr: { d: "Uđite u digitalnu mrežu. Pratite najnoviji gaming sadržaj i pridružite se našoj piksel ekipi!", s: "PRETPLATNICI", v: "UKUPNO PREGLEDA", vi: "VIDEOZAPISI", b: "PRETPLATITE SE" },
+            da: { d: "Dyk ned i det digitale grid. Se de nyeste gaming videoer og bliv en del af pixel-holdet!", s: "ABONNENTER", v: "VISNINGER I ALT", vi: "VIDEOER", b: "ABONNER" },
+            fi: { d: "Sukella digitaaliseen verkkoon. Katso kuumimmat pelivideot ja liity pikseliryhmään!", s: "TILAAJAT", v: "KATSELUER KAIKKIAAN", vi: "VIDEOT", b: "TILAA KANAVA" },
+            no: { d: "Dyk ned i det digitale nettet. Se de nyeste gaming-videoene og bli med i piksel-gjengen!", s: "ABONNENTER", v: "VISNINGER TOTALT", vi: "VIDEOER", b: "ABONNER" },
+            he: { d: "היכנסו לרשת הדיגיטלית. צפו בתכני הגיימינג הכי חמים והצטרפו לצוות הפיקסלים שלנו!", s: "רשומים כמנויים", v: "צפיות כוללות", vi: "סרטונים", b: "הירשם כמנוי" },
+            kk: { d: "Сандық желіге қосылыңыз. Ең соңғы ойын видеоларын көріп, командамызға қосылыңыз!", s: "ЖАЗЫЛУШЫЛАР", v: "ЖАЛПЫ ҚАРАЛЫМ", vi: "ВИДЕОЛАР", b: "ЖАЗЫЛУ" },
+            lt: { d: "Ženkite į skaitmeninį tinklą. Žiūrėkite naujausią žaidimų turinį ir prisijunkite prie mūsų komandos!", s: "PRENUMERATORIAI", v: "PERŽIŪROS IŠ VISO", vi: "VAIZDO ĮRAŠAI", b: "PRENUMERUOTI" },
+            lv: { d: "Ienāc digitālajā tīklā. Skaties jaunāko spēļu saturu un pievienojies mūsu pikseļu komandai!", s: "ABONENTI", v: "SKATĪJUMI KOPĀ", vi: "VIDEOKLIPU", b: "ABONĒT" },
+            et: { d: "Astu digitaalsesse võrku. Vaata värskeimaid mänguvideoid ja liitu meie pikslitiimiga!", s: "TELLIJAD", v: "VAATAMISI KOKKU", vi: "VIDEOD", b: "TELLI KANAL" },
+            sl: { d: "Vstopite v digitalno omrežje. Oglejte si najnovejše igralne videe in se pridružite ekipi!", s: "NAROČNIKI", v: "SKUPNO OGLEDOV", vi: "VIDEOPOSNETKI", b: "NAROČI SE" },
+            sr: { d: "Уђите у дигиталну мрежу. Пратите најновији гејминг садржај и придружите се нашој пиксел екипи!", s: "ПРАТИОЦИ", v: "УКУПНО ПРЕГЛЕДА", vi: "ВИДЕО ЗАПИСИ", b: "ПРИЈАВИ СЕ" },
+            hy: { d: "Մուտք գործեք թվային ցանց։ Դիտեք լավագույն գեյմինգ վիդեοները և միացեք մեր պիքսելային թիմին։", s: "ԲԱԺԱՆՈՐԴԱԳՐՎԵԼ", v: "ԴԻՏՈՒՄՆԵՐԸ ԸՆԴՀԱՆՈՒՐ", vi: "ՏԵՍԱՆՅՈՒԹԵՐ", b: "ԲԱԺԱՆՈՐԴԱԳՐՎԵԼ" }
+        };
+
+        // Geolocation Country routing mapping
+        const countryToLang = {
+            DE: 'de', AT: 'de', CH: 'de', LI: 'de', LU: 'de',
+            ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es', EC: 'es', GT: 'es', PR: 'es', BO: 'es', SV: 'es', HN: 'es', NI: 'es', PA: 'es', PY: 'es', UY: 'es',
+            CN: 'zh', TW: 'zh', HK: 'zh', SG: 'zh',
+            IN: 'hi', NP: 'hi',
+            SA: 'ar', EG: 'ar', AE: 'ar', DZ: 'ar', MA: 'ar', IQ: 'ar', JO: 'ar', YE: 'ar', SY: 'ar', LY: 'ar', TN: 'ar', OM: 'ar', QA: 'ar', BH: 'ar', WI: 'ar', LB: 'ar',
+            FR: 'fr', BE: 'fr', CA: 'fr', MC: 'fr',
+            BD: 'bn',
+            PT: 'pt', BR: 'pt', AO: 'pt', MZ: 'pt', CV: 'pt',
+            RU: 'ru', BY: 'ru', KZ: 'ru', KG: 'ru', UA: 'ru', AM: 'ru', AZ: 'ru', UZ: 'ru', TJ: 'ru',
+            PK: 'ur',
+            ID: 'id',
+            JP: 'ja',
+            TR: 'tr', CY: 'tr',
+            KR: 'ko', KP: 'ko',
+            VN: 'vi',
+            IT: 'it', SM: 'it', VA: 'it',
+            IR: 'fa', AF: 'fa',
+            PL: 'pl',
+            UA: 'uk',
+            NL: 'nl', AW: 'nl', SUR: 'nl',
+            TH: 'th',
+            RO: 'ro', MD: 'ro',
+            AZ: 'az',
+            UZ: 'uz',
+            MY: 'ms', BN: 'ms',
+            ET: 'am',
+            NG: 'yo', BJ: 'yo', TG: 'yo',
+            SO: 'so', DJ: 'so', KE: 'so',
+            BG: 'bg',
+            SV: 'sv', SE: 'sv', FI: 'sv',
+            CZ: 'cs',
+            HU: 'hu',
+            GR: 'el', CY: 'el',
+            SK: 'sk',
+            HR: 'hr', BA: 'hr',
+            DK: 'da', GL: 'da',
+            FI: 'fi',
+            NO: 'no', SJ: 'no',
+            IL: 'he',
+            KZ: 'kk',
+            LT: 'lt',
+            LV: 'lv',
+            EE: 'et',
+            SI: 'sl',
+            RS: 'sr', ME: 'sr', BA: 'sr',
+            AM: 'hy'
+        };
+
+        // 1. Language Detection Engine
+        async function detectAndSetLanguage() {
+            let detectedLang = "en";
+            const hash = window.location.hash.replace("#/", "").toLowerCase();
+
+            if (translations[hash]) {
+                detectedLang = hash;
+                applyDetectedLang(detectedLang);
+                return;
+            }
+
+            try {
+                const geoResponse = await fetch('https://ipapi.co/json/');
+                const geoData = await geoResponse.json();
+                
+                if (geoData && geoData.country_code) {
+                    const mappedLang = countryToLang[geoData.country_code.toUpperCase()];
+                    if (mappedLang) {
+                        detectedLang = mappedLang;
+                    }
+                }
+            } catch (e) {
+                console.warn("Geo IP blocked. Reading browser configuration language.");
+                const browserLang = navigator.language.split('-')[0].toLowerCase();
+                if (translations[browserLang]) {
+                    detectedLang = browserLang;
+                }
+            }
+
+            applyDetectedLang(detectedLang);
+        }
+
+        function applyDetectedLang(lang) {
+            document.getElementById("languageSelector").value = lang;
+            window.location.hash = "/" + lang;
+            applyLanguage(lang);
+        }
+
+        function userSelectedLanguage() {
+            const selected = document.getElementById("languageSelector").value;
+            window.location.hash = "/" + selected;
+            applyLanguage(selected);
+        }
+
+        function applyLanguage(lang) {
+            const elements = [
+                document.getElementById("description"), 
+                document.getElementById("lblSubs"), 
+                document.getElementById("lblViews"), 
+                document.getElementById("lblVideos"), 
+                document.getElementById("subscribeBtn")
+            ];
+            
+            elements.forEach(el => el.style.opacity = '0');
+
+            setTimeout(() => {
+                document.getElementById("description").innerText = translations[lang].d;
+                document.getElementById("lblSubs").innerText = translations[lang].s;
+                document.getElementById("lblViews").innerText = translations[lang].v;
+                document.getElementById("lblVideos").innerText = translations[lang].vi;
+                document.getElementById("subscribeBtn").innerText = translations[lang].b;
+                
+                elements.forEach(el => el.style.opacity = '1');
+            }, 300);
+        }
+
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace("#/", "").toLowerCase();
+            if (translations[hash]) {
+                document.getElementById("languageSelector").value = hash;
+                applyLanguage(hash);
+            }
+        });
+
+        // 2. Real-Time API Data Injection Helper (Prevents popping)
+        function updateStat(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            element.style.opacity = '0'; // Melt previous value away
+            
+            setTimeout(() => {
+                element.innerText = value;
+                element.style.opacity = '1'; // Fade in the real value
+            }, 250);
+        }
+
+        // Real API processing
+        async function fetchYouTubeStats() {
+            const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${CHANNEL_ID}&key=${API_KEY}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const channelData = data.items[0];
+                    const stats = channelData.statistics;
+                    const snippet = channelData.snippet;
+                    
+                    // Update profile picture URL
+                    const pfpUrl = snippet.thumbnails.high.url;
+                    const pfpElement = document.getElementById("pfpImage");
+                    pfpElement.src = pfpUrl;
+                    pfpElement.onload = () => pfpElement.style.opacity = '1';
+
+                    // Update Favicon directly
+                    document.getElementById("favicon").href = pfpUrl;
+
+                    // Hydrate elements with fade-in safety transitions
+                    updateStat("statViews", formatNumber(stats.viewCount));
+                    updateStat("statVideos", stats.videoCount);
+                    updateStat("statSubs", parseInt(stats.subscriberCount).toLocaleString());
+                }
+            } catch (error) {
+                console.error("Error fetching YouTube Stats:", error);
+                updateStat("statSubs", "20,000+");
+                updateStat("statViews", "1.5M");
+                updateStat("statVideos", "150");
+                document.getElementById("pfpImage").src = "New Project (2).png";
+                document.getElementById("pfpImage").style.opacity = '1';
+            }
+        }
+
+        function formatNumber(num) {
+            const val = parseInt(num);
+            if (val >= 1000000) return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (val >= 1000) return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return val;
+        }
+
+        // Initialize Intro Sequence
+        window.onload = () => {
+            detectAndSetLanguage();
+            fetchYouTubeStats();
+
+            // Run camera-fly sequence, then step reveal main elements
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+                
+                // Fetch all cascading reveal-designated elements
+                const items = document.querySelectorAll('.reveal-item');
+                items.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.classList.add('revealed');
+                    }, 120 * index); // Stagger element entry in 120ms delays
+                });
+            }, 2800); // Sequence aligns precisely with the 3D text flythrough end
+        };
+    </script>
+</body>
+</html>
