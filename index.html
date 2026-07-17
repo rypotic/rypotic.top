@@ -29,6 +29,10 @@
             --radius: 16px;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-primary);
@@ -39,7 +43,7 @@
             position: relative;
         }
 
-        /* subtle grid overlay */
+        /* subtle grid overlay (kept) */
         body::before {
             content: "";
             position: fixed;
@@ -52,7 +56,7 @@
             pointer-events: none;
         }
 
-        /* ─── LOADER / INTRO ─── */
+        /* ─── LOADER / INTRO (enhanced but faithful) ─── */
         #loader-overlay {
             position: fixed;
             inset: 0;
@@ -173,6 +177,33 @@
             }
         }
 
+        .skip-intro-btn {
+            position: absolute;
+            bottom: 48px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            padding: 10px 22px;
+            border-radius: 40px;
+            cursor: pointer;
+            letter-spacing: 0.08em;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .skip-intro-btn:hover {
+            color: #fff;
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.08);
+            transform: scale(1.03);
+        }
+        .skip-intro-btn:active {
+            transform: scale(0.94);
+        }
+
         .loaded #loader-overlay {
             opacity: 0;
             pointer-events: none;
@@ -202,6 +233,12 @@
             transform: translateY(0);
         }
 
+        /* ─── SCROLL FADE UTILITY ─── */
+        .fade-section {
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
         /* ─── NAV ─── */
         nav {
             display: flex;
@@ -216,6 +253,67 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        /* Network status badge (NEW) */
+        #netBadge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 6px 16px 6px 12px;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            cursor: default;
+            white-space: nowrap;
+        }
+        #netBadge .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: background 0.4s ease, box-shadow 0.4s ease;
+        }
+        #netBadge .dot.good {
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+        }
+        #netBadge .dot.ok {
+            background: #eab308;
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.25);
+        }
+        #netBadge .dot.bad {
+            background: #ef4444;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+            animation: pulseBad 1.2s ease-in-out infinite;
+        }
+        #netBadge .dot.unknown {
+            background: #64748b;
+        }
+
+        @keyframes pulseBad {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        #netBadge .label {
+            text-transform: uppercase;
+        }
+        #netBadge .ping {
+            opacity: 0.6;
+            font-weight: 400;
         }
 
         select {
@@ -359,24 +457,254 @@
             transition: opacity 0.3s ease;
         }
 
-        /* ─── SUBSCRIBE BTN ─── */
-        .btn-subscribe {
-            display: inline-block;
+        /* ─── BUTTONS ─── */
+        .button-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 600px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            padding: 15px 36px;
+            text-decoration: none;
+            transition: transform 0.25s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            flex: 1;
+            min-width: 220px;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-subscribe {
             color: #ffffff;
             background-color: var(--accent-blue);
-            border-radius: 12px;
-            padding: 16px 45px;
-            text-decoration: none;
-            transition: transform 0.25s ease, background-color 0.2s ease;
+            border: 1px solid var(--accent-blue);
         }
         .btn-subscribe:hover {
             transform: translateY(-2px);
             background-color: #2563eb;
+            border-color: #2563eb;
         }
         .btn-subscribe:active {
             transform: scale(0.96);
+        }
+
+        .btn-secondary {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background-color: rgba(255, 255, 255, 0.07);
+            border-color: var(--text-secondary);
+        }
+        .btn-secondary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* ─── SCROLL FOR MORE ─── */
+        #scrollIndicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            pointer-events: none;
+        }
+        #scrollIndicator.show {
+            opacity: 1;
+        }
+        #scrollIndicator.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        .scroll-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border-right: 2px solid var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+            transform: rotate(45deg);
+            animation: scrollBounce 2s ease-in-out infinite;
+        }
+        @keyframes scrollBounce {
+            0%, 100% {
+                transform: rotate(45deg) translateY(0);
+                opacity: 0.6;
+            }
+            50% {
+                transform: rotate(45deg) translateY(6px);
+                opacity: 1;
+            }
+        }
+
+        /* ─── GITHUB PROJECTS SECTION ─── */
+        #github-projects {
+            padding: 80px 24px 100px;
+            max-width: 1000px;
+            margin: 120px auto 80px;
+            width: 100%;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 60%, var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .project-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), #8b5cf6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+        .project-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.1);
+        }
+
+        .project-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .project-name svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .project-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+            margin-bottom: 16px;
+        }
+
+        .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'Space Mono', monospace;
+            flex-wrap: wrap;
+        }
+        .project-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .project-meta .lang-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .project-stars {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .project-stars svg {
+            width: 14px;
+            height: 14px;
+            fill: #eab308;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: gap 0.25s ease;
+        }
+        .project-link:hover {
+            gap: 10px;
+        }
+        .project-link svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
         }
 
         /* ─── RESPONSIVE ─── */
@@ -388,6 +716,14 @@
             .nav-group {
                 width: 100%;
                 justify-content: center;
+            }
+            #netBadge {
+                font-size: 0.55rem;
+                padding: 6px 14px 6px 10px;
+            }
+            #netBadge .dot {
+                width: 8px;
+                height: 8px;
             }
             select {
                 font-size: 0.65rem;
@@ -427,7 +763,13 @@
                 right: 8px;
             }
 
-            .btn-subscribe {
+            .button-group {
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .btn-action {
                 font-size: 0.9rem;
                 padding: 14px 30px;
                 width: 100%;
@@ -449,6 +791,35 @@
                 width: 160px;
                 height: 56px;
             }
+            .skip-intro-btn {
+                bottom: 28px;
+                font-size: 0.6rem;
+                padding: 8px 18px;
+            }
+
+            #github-projects {
+                padding: 50px 16px 80px;
+            }
+            .section-header h2 {
+                font-size: 1.5rem;
+            }
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            .project-card {
+                padding: 22px 18px;
+            }
+
+            #scrollIndicator {
+                bottom: 20px;
+            }
+            .scroll-text {
+                font-size: 0.55rem;
+            }
+            .scroll-arrow {
+                width: 16px;
+                height: 16px;
+            }
         }
 
         @media (max-width: 420px) {
@@ -462,7 +833,7 @@
                 font-size: 0.95rem;
             }
             .stat-title {
-                font-size: 0.50rem;
+                font-size: 0.5rem;
             }
             .stat-card.live::after {
                 display: none;
@@ -493,11 +864,17 @@
             <div class="intro-frame"></div>
             <div class="intro-title">rypotic</div>
         </div>
+        <button class="skip-intro-btn" onclick="skipIntro()">⏎ SKIP INTRO</button>
     </div>
 
     <div id="app-content">
         <nav>
             <div class="nav-group">
+                <div id="netBadge" title="Network latency & connectivity">
+                    <span class="dot unknown"></span>
+                    <span class="label">checking…</span>
+                    <span class="ping"></span>
+                </div>
                 <select id="languageSelector" onchange="userSelectedLanguage()">
                     <option value="en">ENGLISH</option>
                     <option value="es">ESPAÑOL</option>
@@ -579,8 +956,38 @@
                 </div>
             </div>
 
-            <a href="https://youtube.com/@rypotic" target="_blank" id="subscribeBtn" class="btn-subscribe reveal-item">JOIN CHANNEL</a>
+            <div class="button-group">
+                <a href="https://youtube.com/channel/UCDI6_C1JHhu52F0MpVWdA9g" target="_blank" id="subscribeBtn" class="btn-action btn-subscribe reveal-item">
+                    <svg class="btn-icon" viewBox="0 0 24 24">
+                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.388.507 9.388.507s7.517 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    JOIN CHANNEL
+                </a>
+                <a href="https://github.com/rypotic" target="_blank" class="btn-action btn-secondary reveal-item">
+                    <svg class="btn-icon" viewBox="0 0 24 24">
+                        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                    </svg>
+                    GITHUB
+                </a>
+            </div>
         </main>
+
+        <!-- ─── GITHUB PROJECTS SECTION ─── -->
+        <section id="github-projects" class="fade-section">
+            <div class="section-header">
+                <h2>projects</h2>
+                <p>All of my GitHub Projects </p>
+            </div>
+            <div class="projects-grid" id="projectsGrid">
+                <!-- Projects injected by JS -->
+            </div>
+        </section>
+    </div>
+
+    <!-- ─── SCROLL FOR MORE INDICATOR ─── -->
+    <div id="scrollIndicator">
+        <span class="scroll-text">Scroll for more</span>
+        <div class="scroll-arrow"></div>
     </div>
 
     <script>
@@ -589,6 +996,7 @@
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         const API_KEY = "AIzaSyA6-iaqBaV_ojNUtBYNgiQYvKDnd9_Cg3M";
         const CHANNEL_ID = "UCDI6_C1JHhu52F0MpVWdA9g";
+        const GITHUB_USER = "rypotic";
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         //  TRANSLATIONS (53 languages) — exactly as original
@@ -600,7 +1008,7 @@
                 s: "SUSCRIPTORES", v: "VISTAS TOTALES", vi: "VIDEOS", b: "UNIRSE AL CANAL" },
             zh: { d: "融入数字世界。观看最新、最火爆的游戏内容，加入我们的像素阵营！", s: "订阅者", v: "总观看次数", vi: "视频数",
             b: "加入频道" },
-            hi: { d: "डिजिटल ग्रिड में कदम रखें। बेहतरीन गेमिंग कंटेंट देखें और पिक्सेल क्रू में शामिल हों!", s: "सदस्य",
+            hi: { d: "डिजिटल ग्रिड में कदम रखें। बेहतरीन गेमिंग कंटेंट देखें` और पिक्सेल क्रू में शामिल हों!", s: "सदस्य",
                 v: "कुल व्यूज", vi: "वीडियो", b: "चैनल से जुड़ें" },
             ar: { d: "انغمس في الشبكة الرقمية. تابع أحدث محتوى الألعاب المثير وانضم إلى طاقم البكسل الخاص بنا!",
                 s: "المشتركون", v: "إجمالي المشاهدات", vi: "الفيديوهات", b: "اشترك الآن" },
@@ -612,22 +1020,22 @@
                 s: "INSCRITOS", v: "VISUALIZAÇÕES", vi: "VÍDEOS", b: "INSCREVER-SE" },
             ru: { d: "Погрузись в цифровую сеть. Смотри крутейший игровой контент и вступай в нашу пиксельную банду!",
                 s: "ПОДПИСЧИКИ", v: "ПРОСМОТРЫ", vi: "ВИДЕО", b: "ПОДПИСАТЬСЯ" },
-            ur: { d: "ڈیجیٹل گریڈ में शामिल हों। تازہ ترین زبردست گیمنگ مواد دیکھیں اور پکسل ٹیم کا حصہ بنیں!",
+            ur: { d: "ڈیجیٹل گریڈ میں شامل ہوں۔ تازہ ترین زبردست گیمنگ مواد دیکھیں اور پکسل ٹیم کا حصہ بنیں!",
                 s: "سبسکرائبرز", v: "کل ویوز", vi: "ویڈیوز", b: "شامل ہوں" },
             id: { d: "Masuk ke dunia digital grid. Tonton konten gaming seru terbaru dan bergabunglah dengan kru piksel!",
                 s: "SUBSCRIBER", v: "TOTAL TAYANGAN", vi: "VIDEO", b: "GABUNG SALURAN" },
             de: { d: "Tauche ein in das digitale Raster. Hol dir die neuesten Gaming-Inhalte und werde Teil der Pixel-Crew!",
                 s: "ABONNENTEN", v: "ANSICHTEN", vi: "VIDEOS", b: "KANAL BEITRETEN" },
             ja: { d: "デジタルグリッドへ飛び込もう。最新のゲーム実況動画をチェックして、ピクセルクルーに参加しよう！",
-                s: "チャンネル登録者", v: "総再生回数", vi: "動画数", b: "登録する" },
+                s: "チャンネル登録者", v: "总再生回数", vi: "動画数", b: "登録する" },
             mr: { d: "डिजिटल ग्रिडमध्ये प्रवेश करा. सर्वोत्तम गेमिंग व्हिडिओ पहा आणि पिक्सेल क्रूमध्ये सामील व्हा!",
                 s: "सदस्य", v: "एकूण व्ह्यूज", vi: "व्हिडिओ", b: "चॅनेल सबस्क्राईब करा" },
-            te: { d: "డిజిటల్ గ్రిడ్‌లోకి అడుగుపెట్టండి. సరికొత్త గేమింగ్ కంటెంట్‌ను వీક્ષించండి మరియు పిక్సెల్ క్రూలో చేరండి!",
+            te: { d: "డిజిటల్ గ్రిడ్‌లోకి అడుగుపెట్టండి. సరికొత్త గేమింగ్ কন্টెంట్‌ను వీక్షించండి మరియు పిక్సెల్ క్రూలో చేరండి!",
                 s: "సబ్‌స్క్రైబర్లు", v: "మొత్తం వీక్షణలు", vi: "వీడియోలు", b: "ఛానెల్‌లో చేరండి" },
             tr: { d: "Dijital ağa adım at. En son yüksek tempolu oyun içeriklerini yakala ve ekibe katıl!",
                 s: "ABONE SAYISI", v: "TOPLAM İZLENME", vi: "VİDEOLAR", b: "ABONE OL" },
             ta: { d: "டிஜிட்டல் கிரிட்டில் இணையுங்கள். சிறந்த கேமிங் வீடியோக்களைப் பார்த்து, எங்களுடன் இணைந்திடுங்கள்!",
-                s: "சந்தாதாரர்கள்", v: "மொத்த பார்வைகள்", vi: "வீдеоக்கள்", b: "இணைந்திடுங்கள்" },
+                s: "சந்தாதாரர்கள்", v: "மொத்த பார்வைகள்", vi: "வீடியோக்கள்", b: "இணைந்திடுங்கள்" },
             ko: { d: "디지털 그리드로 접속하세요. 최신 고화질 게이밍 콘텐츠를 즐기고 픽셀 크루에 합류하세요!",
                 s: "구독자 수", v: "총 조회수", vi: "동영상", b: "구독하기" },
             vi: { d: "Đắm chìm vào không gian kỹ thuật số. Xem những nội dung game đỉnh cao và tham gia vào biệt đội pixel!",
@@ -649,7 +1057,7 @@
             kn: { d: "ಡಿಜಿಟಲ್ ಗ್ರಿಡ್‌ಗೆ ಹೆಜ್ಜೆ ಇಡಿ. ಲೇಟೆಸ್ಟ್ ಗೇಮಿಂಗ್ ಕಂಟೆಂಟ್ ನೋಡಿ ಮತ್ತು ಪಿಕ್ಸೆಲ್ ಕ್ರೂ ಸೇರಿಕೊಳ್ಳಿ!",
                 s: "ಚಂದಾದಾರರು", v: "ಒಟ್ಟು ವೀಕ್ಷಣೆಗಳು", vi: "ವಿಡಿಯೋಗಳು", b: "ಚಾನೆಲ್ ಸೇರಿ" },
             ml: { d: "ഡിജിറ്റൽ ഗ്രിഡിലേക്ക് കടന്നുവരൂ. ലേറ്റസ്റ്റ് ഗെയിമിംഗ് വീഡിയോകൾ കണ്ട് പിക്സൽ ക്രൂവിൽ അംഗമാകൂ!",
-                s: "സബ്സ്ക്രൈബർമാർ", v: "ആകെ കാഴ്ച്ചകൾ", vi: "വീдеоകൾ", b: "ചാനലിൽ ചേരുക" },
+                s: "സബ്സ്ക്രൈബർമാർ", v: "ആകെ കാഴ്ച്ചകൾ", vi: "വീഡിയോകൾ", b: "ചാനലിൽ ചേരുക" },
             ro: { d: "Intră în lumea digitală. Urmărește cel mai nou conținut de gaming și alătură-te echipei de pixeli!",
                 s: "ABONAȚI", v: "VIZUALIZĂRI", vi: "VIDEOCLIPURI", b: "ALĂTURĂ-TE KANAL" },
             az: { d: "Rəqəmsal şəbəkəyə daxil olun. Ən son oyun videolarını izləyin və komandamıza qoşulun!",
@@ -658,8 +1066,8 @@
                 s: "OBUNACHILAR", v: "KO'RILISHLAR", vi: "VİDEOLAR", b: "QO'SHILISH" },
             ms: { d: "Sertai grid digital. Tonton kandungan permainan video terkini dan sertai kru piksel kami!",
                 s: "PELANGGAN", v: "JUMLAH TONTONAN", vi: "VIDEO", b: "LANGGAN" },
-            am: { d: "ወደ ዲጂታል ግሪድ ይግቡ። የቅርብ ጊዜ የጌሚንግ ቪዲዮዎችን ይመልเกቱ እና የፒክሰል ቡድንን ይቀላቀሉ!",
-                s: "ተከታዮች", v: "ጠቅላลา እይታዎች", vi: "ቪዲዮዎች", b: "ሰብስክራይብ ያድርጉ" },
+            am: { d: "ወደ ዲጂታል ግሪድ ይግቡ። የቅርብ ጊዜ የጌሚንግ ቪዲዮዎችን ይመልከቱ এবং የፒክሰል ቡድንን ይቀላቀሉ!",
+                s: "ተከታዮች", v: "ጠቅላላ እይታዎች", vi: "ቪዲዮዎች", b: "ሰብስክራይብ ያድርጉ" },
             yo: { d: "Darapọ mọ nẹtiwọọki oni-nọmba wa. Wo awọn fidio ere tuntun ki o darapọ mọ ẹgbẹ wa!",
                 s: "AWỌN OLUTẸLẸ", v: "WOSAN GBOGBO", vi: "FIDIO", b: "DARAPỌ MỌ" },
             so: { d: "Ku soo biir shabakada dhijitaalka ah. Daawo muuqaaladii ugu dambeeyay ee ciyaaraha!",
@@ -698,60 +1106,200 @@
                 s: "NAROČNIKI", v: "SKUPNO OGLEDOV", vi: "VIDEOPOSNETKI", b: "NAROČI SE" },
             sr: { d: "Уђите у дигиталну мрежу. Пратите најновији гејминг садржај и придружите се нашој пиксел екипи!",
                 s: "ПРАТИОЦИ", v: "УКУПНО ПРЕГЛЕДА", vi: "ВИДЕО ЗАПИСИ", b: "ПРИЈАВИ СЕ" },
-            hy: { d: "Մուտք գործեք թվային ցանց։ Դիտեք լավագույն գեյմինգ վիդեոները և միացեք մեր պիքսելային թիմին։",
+            hy: { d: "Մուտք գործեք թվային ցանց։ Դիտեք լավագույն գեյմինգ վիդեοները և միացեք մեր պիքսելային թիմին։",
                 s: "ԲԱԺԱՆՈՐԴՆԵՐ", v: "ԴԻՏՈՒՄՆԵՐԸ ԸՆԴՀԱՆՈՒՐ", vi: "ՏԵՍԱՆՅՈՒԹԵՐ", b: "ԲԱԺԱՆՈՐԴԱԳՐՎԵԼ" }
         };
 
         const countryToLang = {
-            DE: 'de', AT: 'de', CH: 'de', LI: 'de', LU: 'de',
-            ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es', EC: 'es', GT: 'es', PR: 'es', BO: 'es', SV: 'es', HN: 'es', NI: 'es', PA: 'es', PY: 'es', UY: 'es',
-            CN: 'zh', TW: 'zh', HK: 'zh', SG: 'zh',
-            IN: 'hi', NP: 'hi',
-            SA: 'ar', EG: 'ar', AE: 'ar', DZ: 'ar', MA: 'ar', IQ: 'ar', JO: 'ar', YE: 'ar', SY: 'ar', LY: 'ar', TN: 'ar', OM: 'ar', QA: 'ar', BH: 'ar', WI: 'ar', LB: 'ar',
-            FR: 'fr', BE: 'fr', CA: 'fr', MC: 'fr',
+            DE: 'de',
+            AT: 'de',
+            CH: 'de',
+            LI: 'de',
+            LU: 'de',
+            ES: 'es',
+            MX: 'es',
+            AR: 'es',
+            CO: 'es',
+            CL: 'es',
+            PE: 'es',
+            VE: 'es',
+            EC: 'es',
+            GT: 'es',
+            PR: 'es',
+            BO: 'es',
+            SV: 'es',
+            HN: 'es',
+            NI: 'es',
+            PA: 'es',
+            PY: 'es',
+            UY: 'es',
+            CN: 'zh',
+            TW: 'zh',
+            HK: 'zh',
+            SG: 'zh',
+            IN: 'hi',
+            NP: 'hi',
+            SA: 'ar',
+            EG: 'ar',
+            AE: 'ar',
+            DZ: 'ar',
+            MA: 'ar',
+            IQ: 'ar',
+            JO: 'ar',
+            YE: 'ar',
+            SY: 'ar',
+            LY: 'ar',
+            TN: 'ar',
+            OM: 'ar',
+            QA: 'ar',
+            BH: 'ar',
+            WI: 'ar',
+            LB: 'ar',
+            FR: 'fr',
+            BE: 'fr',
+            CA: 'fr',
+            MC: 'fr',
             BD: 'bn',
-            PT: 'pt', BR: 'pt', AO: 'pt', MZ: 'pt', CV: 'pt',
-            RU: 'ru', BY: 'ru', KZ: 'ru', KG: 'ru', UA: 'ru', AM: 'ru', AZ: 'ru', UZ: 'ru', TJ: 'ru',
+            PT: 'pt',
+            BR: 'pt',
+            AO: 'pt',
+            MZ: 'pt',
+            CV: 'pt',
+            RU: 'ru',
+            BY: 'ru',
+            KZ: 'ru',
+            KG: 'ru',
+            UA: 'ru',
+            AM: 'ru',
+            AZ: 'ru',
+            UZ: 'ru',
+            TJ: 'ru',
             PK: 'ur',
             ID: 'id',
             JP: 'ja',
-            TR: 'tr', CY: 'tr',
-            KR: 'ko', KP: 'ko',
+            TR: 'tr',
+            CY: 'tr',
+            KR: 'ko',
+            KP: 'ko',
             VN: 'vi',
-            IT: 'it', SM: 'it', VA: 'it',
-            IR: 'fa', AF: 'fa',
+            IT: 'it',
+            SM: 'it',
+            VA: 'it',
+            IR: 'fa',
+            AF: 'fa',
             PL: 'pl',
             UK: 'uk',
-            NL: 'nl', AW: 'nl', SUR: 'nl',
+            NL: 'nl',
+            AW: 'nl',
+            SUR: 'nl',
             TH: 'th',
-            RO: 'ro', MD: 'ro',
+            RO: 'ro',
+            MD: 'ro',
             UZ: 'uz',
-            MY: 'ms', BN: 'ms',
+            MY: 'ms',
+            BN: 'ms',
             ET: 'am',
-            YO: 'yo', BJ: 'yo', TG: 'yo',
-            SO: 'so', DJ: 'so', KE: 'so',
+            YO: 'yo',
+            BJ: 'yo',
+            TG: 'yo',
+            SO: 'so',
+            DJ: 'so',
+            KE: 'so',
             BG: 'bg',
-            SV: 'sv', SE: 'sv', FI: 'sv',
+            SV: 'sv',
+            SE: 'sv',
+            FI: 'sv',
             CZ: 'cs',
             HU: 'hu',
             GR: 'el',
             SK: 'sk',
-            HR: 'hr', BA: 'hr',
-            DK: 'da', GL: 'da',
+            HR: 'hr',
+            BA: 'hr',
+            DK: 'da',
+            GL: 'da',
             FI: 'fi',
-            NO: 'no', SJ: 'no',
+            NO: 'no',
+            SJ: 'no',
             IL: 'he',
             KZ: 'kk',
             LT: 'lt',
             LV: 'lv',
             EE: 'et',
             SI: 'sl',
-            RS: 'sr', ME: 'sr', BA: 'sr',
+            RS: 'sr',
+            ME: 'sr',
+            BA: 'sr',
             AM: 'hy'
         };
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  LANGUAGE ENGINE
+        //  NETWORK DIAGNOSTIC (WiFi / connection test)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        async function testNetwork() {
+            const badge = document.getElementById('netBadge');
+            const dot = badge.querySelector('.dot');
+            const label = badge.querySelector('.label');
+            const pingEl = badge.querySelector('.ping');
+
+            let ping = -1;
+            let status = 'unknown';
+            let statusLabel = 'Checking…';
+
+            try {
+                const start = performance.now();
+                await fetch('https://www.google.com/generate_204', {
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    signal: AbortSignal.timeout(5000)
+                });
+                const end = performance.now();
+                ping = Math.round(end - start);
+
+                if (ping > 500) { status = 'bad';
+                    statusLabel = 'Fucked Up'; } else if (ping > 180) { status = 'ok';
+                    statusLabel = 'Slow'; } else if (ping > 80) { status = 'ok';
+                    statusLabel = 'Okay'; } else { status = 'good';
+                    statusLabel = 'Fast'; }
+
+            } catch (_) {
+                // fallback to navigator.connection
+                if (navigator.connection) {
+                    const conn = navigator.connection;
+                    const type = conn.effectiveType || 'unknown';
+                    const down = conn.downlink || 0;
+                    const rtt = conn.rtt || -1;
+
+                    if (type === 'slow-2g' || type === '2g' || down < 0.5) {
+                        status = 'bad';
+                        statusLabel = 'Fucked Up';
+                    } else if (type === '3g' || down < 2) {
+                        status = 'ok';
+                        statusLabel = 'Slow';
+                    } else if (type === '4g' || down >= 2) {
+                        status = 'good';
+                        statusLabel = 'Fast';
+                    } else {
+                        status = 'unknown';
+                        statusLabel = 'Unknown';
+                    }
+                    if (rtt > 0) ping = rtt;
+                } else {
+                    status = 'bad';
+                    statusLabel = 'Offline';
+                }
+            }
+
+            // Update UI
+            dot.className = `dot ${status}`;
+            label.textContent = statusLabel;
+            pingEl.textContent = (ping > 0) ? `${ping}ms` : '';
+
+            // re-run every 15 seconds
+            setTimeout(testNetwork, 15000);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  LANGUAGE ENGINE (unchanged from original)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         function applyLanguage(lang) {
             const t = translations[lang];
@@ -853,9 +1401,229 @@
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  INTRO / LOADER SYSTEM
+        //  GITHUB PROJECTS
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        function playIntro() {
+        const languageColors = {
+            JavaScript: '#f1e05a',
+            TypeScript: '#3178c6',
+            Python: '#3572A5',
+            HTML: '#e34c26',
+            CSS: '#563d7c',
+            Java: '#b07219',
+            Go: '#00ADD8',
+            Rust: '#dea584',
+            C: '#555555',
+            'C++': '#f34b7d',
+            'C#': '#178600',
+            Ruby: '#701516',
+            PHP: '#4F5D95',
+            Swift: '#F05138',
+            Kotlin: '#A97BFF',
+            Dart: '#00B4AB',
+            Lua: '#000080',
+            Shell: '#89e051',
+            Dockerfile: '#384d54',
+            Vue: '#41b883',
+            Svelte: '#ff3e00',
+            Scala: '#c22d40',
+            Haskell: '#5e5086',
+            Elixir: '#6e4a7e',
+            Clojure: '#db5855',
+            Erlang: '#b83998',
+            R: '#198CE7',
+            Julia: '#a270ba',
+            Perl: '#0298c3',
+            Solidity: '#AA6746',
+        };
+
+        async function fetchGitHubProjects() {
+            const grid = document.getElementById('projectsGrid');
+            try {
+                const res = await fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=6&type=owner`);
+                if (!res.ok) throw new Error('GitHub API error');
+                const repos = await res.json();
+                if (!repos.length) throw new Error('No repos');
+
+                grid.innerHTML = '';
+                repos.forEach(repo => {
+                    if (repo.fork) return;
+                    const langColor = languageColors[repo.language] || '#6b7280';
+                    const card = document.createElement('div');
+                    card.className = 'project-card fade-section';
+                    card.innerHTML = `
+                        <div class="project-name">
+                            <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            ${repo.name}
+                        </div>
+                        <div class="project-desc">${repo.description || 'No description provided.'}</div>
+                        <div class="project-meta">
+                            ${repo.language ? `<span><span class="lang-dot" style="background:${langColor}"></span>${repo.language}</span>` : ''}
+                            <span class="project-stars">
+                                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                ${repo.stargazers_count}
+                            </span>
+                            <span>🍴 ${repo.forks_count}</span>
+                        </div>
+                        <a href="${repo.html_url}" target="_blank" class="project-link">
+                            View Repository
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </a>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                // Update fade for new project cards
+                updateFadeSections();
+
+            } catch (_) {
+                // Fallback: show placeholder projects
+                grid.innerHTML = `
+                    <div class="project-card fade-section">
+                        <div class="project-name">
+                            <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            rypotic/dotfiles
+                        </div>
+                        <div class="project-desc">Personal configuration files and development environment setup.</div>
+                        <div class="project-meta">
+                            <span><span class="lang-dot" style="background:#89e051"></span>Shell</span>
+                            <span class="project-stars">
+                                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                12
+                            </span>
+                            <span>🍴 3</span>
+                        </div>
+                        <a href="https://github.com/rypotic" target="_blank" class="project-link">
+                            View Repository
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </a>
+                    </div>
+                    <div class="project-card fade-section">
+                        <div class="project-name">
+                            <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            rypotic/website
+                        </div>
+                        <div class="project-desc">Personal hub and digital grid presence — built with vanilla everything.</div>
+                        <div class="project-meta">
+                            <span><span class="lang-dot" style="background:#e34c26"></span>HTML</span>
+                            <span class="project-stars">
+                                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                8
+                            </span>
+                            <span>🍴 1</span>
+                        </div>
+                        <a href="https://github.com/rypotic" target="_blank" class="project-link">
+                            View Repository
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </a>
+                    </div>
+                    <div class="project-card fade-section">
+                        <div class="project-name">
+                            <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                            rypotic/scripts
+                        </div>
+                        <div class="project-desc">Useful automation scripts and CLI tools for daily workflows.</div>
+                        <div class="project-meta">
+                            <span><span class="lang-dot" style="background:#3572A5"></span>Python</span>
+                            <span class="project-stars">
+                                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                5
+                            </span>
+                            <span>🍴 0</span>
+                        </div>
+                        <a href="https://github.com/rypotic" target="_blank" class="project-link">
+                            View Repository
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </a>
+                    </div>
+                `;
+                updateFadeSections();
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  PROGRESSIVE SCROLL FADE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function updateFadeSections() {
+            const windowHeight = window.innerHeight;
+            document.querySelectorAll('.fade-section').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const elTop = rect.top;
+                const elBottom = rect.bottom;
+
+                // Element is fully above viewport (scrolled past) - fade out at top
+                if (elBottom < 0) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-20px)';
+                    return;
+                }
+
+                // Element is fully below viewport (not yet reached)
+                if (elTop > windowHeight) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(40px)';
+                    return;
+                }
+
+                // Calculate fade-in from bottom: starts at 95% viewport, fully visible by 75%
+                const fadeInStart = windowHeight * 0.95;
+                const fadeInEnd = windowHeight * 0.75;
+                let bottomProgress = 1 - (elTop - fadeInEnd) / (fadeInStart - fadeInEnd);
+                bottomProgress = Math.max(0, Math.min(1, bottomProgress));
+
+                // Calculate fade-out at top: starts only when element bottom passes -20% from top (mostly offscreen)
+                const fadeOutStart = windowHeight * -0.20;
+                let topProgress = 1;
+                if (elBottom < fadeOutStart) {
+                    topProgress = Math.max(0, (elBottom - fadeOutStart) / (-fadeOutStart));
+                }
+
+                // Use the minimum of both (fade in from bottom, fade out at top)
+                let progress = Math.min(bottomProgress, topProgress);
+
+                // Smooth easing
+                const eased = progress < 0.5
+                    ? 2 * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+                el.style.opacity = eased;
+                el.style.transform = `translateY(${(1 - eased) * 30}px)`;
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  SCROLL INDICATOR
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        let scrollIndicatorTimer = null;
+
+        function setupScrollIndicator() {
+            const indicator = document.getElementById('scrollIndicator');
+
+            // Show the indicator after everything is loaded
+            setTimeout(() => {
+                indicator.classList.add('show');
+            }, 3200); // slightly after intro finishes
+
+            // Hide indicator when user starts scrolling
+            let hasScrolled = false;
+            window.addEventListener('scroll', () => {
+                if (!hasScrolled && window.scrollY > 10) {
+                    hasScrolled = true;
+                    indicator.classList.remove('show');
+                    indicator.classList.add('hide');
+                }
+                // If user scrolls back to top, show it again
+                if (window.scrollY < 10) {
+                    hasScrolled = false;
+                    indicator.classList.remove('hide');
+                    indicator.classList.add('show');
+                }
+            }, { passive: true });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  INTRO / LOADER
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function skipIntro() {
             document.body.classList.add('loaded');
             const items = document.querySelectorAll('.reveal-item');
             items.forEach((el, i) => {
@@ -870,19 +1638,24 @@
         window.onload = function() {
             detectAndSetLanguage();
             fetchYouTubeStats();
+            testNetwork();
+            fetchGitHubProjects();
+            setupScrollIndicator();
 
-            const played = sessionStorage.getItem('introPlayed');
-            if (played === 'true') {
-                playIntro();
-            } else {
-                setTimeout(() => {
-                    if (!document.body.classList.contains('loaded')) {
-                        playIntro();
-                    }
-                }, 2800); // Wait for intro animation to complete naturally
-            }
+            // Always play the intro on page load
+            setTimeout(() => {
+                if (!document.body.classList.contains('loaded')) {
+                    skipIntro();
+                }
+            }, 2800); // matches original timing
+
+            // Initial fade update
+            setTimeout(updateFadeSections, 100);
+
+            // Update fade on scroll
+            window.addEventListener('scroll', updateFadeSections, { passive: true });
+            window.addEventListener('resize', updateFadeSections, { passive: true });
         };
     </script>
-
 </body>
 </html>
